@@ -1,0 +1,30 @@
+{
+  "name": "javascript-fireworks",
+  "version": "1.0.0",
+  "description": "Test assignment for gotoAndPlay internship application 2021.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node .",
+    "start:dev": "nodemon ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/karinjohanson/javascript-fireworks.git"
+  },
+  "keywords": [
+    "html",
+    "canvas",
+    "vanilla.js",
+    "node.js"
+  ],
+  "author": "gitHub user karinjohanson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/karinjohanson/javascript-fireworks/issues"
+  },
+  "homepage": "https://github.com/karinjohanson/javascript-fireworks#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "nodemon": "^2.0.7"
+  }
+}
