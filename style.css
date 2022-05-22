@@ -1,9 +1,25 @@
+/*
+Related files: index.html, canvas.js
+Author: GitHub user devKarin
+*/
+
 canvas {
-    background-color: black;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  z-index: -1;
+  background-color: black;
 }
 
 body {
-    margin: 0;
-    width: 100vw;
-    height: 100vh;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#devKarinLogo {
+  position: absolute;
+  display: none;
+  z-index: 2;
 }
