@@ -23,11 +23,11 @@ const MAXRADIUS = 1.7;
 let shootingstars = [];
 let fireworksParticles = [];
 let burstparticles = [];
-let burstnumbers = [];
+let bursteffects = [];
 
 // Helpers
 let countForDisperse = 0;
-let countForParticleChange = 0;
+let countForExplosionEffectChange = 0;
 const EXPLOSIONS = 40;
 const DISPERSION = 3;
 
@@ -107,7 +107,6 @@ function playCanvas() {
             }
 
             allStars.push(new Star(initialCoordinates, velocity, radius, rgbSet, angle, circleCenter, newCoordinates));
-
         }
     }
 
@@ -132,6 +131,17 @@ function playCanvas() {
             context.fill();
         }
 
+        this.speedupAndSparkleBrighter = function () {
+
+            // If the mouse is in the certain range from stars centre, increase the orbiting velocity
+            if (this.velocity > -4 && this.velocity < 8) {
+                this.velocity = this.velocity * 10;
+            }
+
+            //  Make stars sparkle brighter
+            this.color = `rgb(${rgbSet.colorR}, ${rgbSet.colorG}, ${rgbSet.colorB}, ${SPARKLE})`;
+        }
+
         // Make the star circle on its orbit
         this.update = function () {
             this.newX = this.radius * Math.cos(this.angle * (Math.PI / 180));
@@ -148,11 +158,9 @@ function playCanvas() {
             // Add user interactivity - if the mouse is in the certain range from stars centre, increase the orbiting velocity and create a new fireworks object
             if ((MOUSE.x - this.x < TOUCHRANGE) && (MOUSE.x - this.x > -TOUCHRANGE) && (MOUSE.y - this.y < TOUCHRANGE) && (MOUSE.y - this.y > -TOUCHRANGE)) {
 
-                if (this.velocity > -4 && this.velocity < 8) {
-                    this.velocity = this.velocity * 10;
-                }
+                this.speedupAndSparkleBrighter();
 
-                // For every n-th star in a touch range a firework object is created 
+                // For every n-th star in a touch range a firework object i.e shooting star is created 
                 if (countForDisperse === DISPERSION) {
                     context.beginPath();
                     const newShootingStar = new ShootingStar(this.x, this.y, radius, this.color);
@@ -168,13 +176,7 @@ function playCanvas() {
 
             } else if ((MOUSE.x - this.x < PROXIMITY) && (MOUSE.x - this.x > -PROXIMITY) && (MOUSE.y - this.y < PROXIMITY) && (MOUSE.y - this.y > -PROXIMITY)) {
 
-                // If the mouse is in the certain range from stars centre, increase the orbiting velocity AND make stars sparkle brighter
-                if (this.velocity > -4 && this.velocity < 8) {
-                    this.velocity = this.velocity * 10;
-                }
-
-                this.color = `rgb(${rgbSet.colorR}, ${rgbSet.colorG}, ${rgbSet.colorB}, ${SPARKLE})`;
-
+                this.speedupAndSparkleBrighter();
 
             } else if (this.velocity >= 8 || this.velocity <= -4) {
 
@@ -193,7 +195,6 @@ function playCanvas() {
         this.y = y;
         this.radius = radius;
         this.color = color;
-        //this.radius = 2;
         this.acceleration = 6;
         this.velocity = Math.random() * 2 * this.acceleration;
 
@@ -213,6 +214,7 @@ function playCanvas() {
                 shootingstars.splice(shootingstars.indexOf(this), 1);
             }
 
+            // Shoot the star
             context.beginPath();
             this.x += this.newX;
             this.y += this.newY;
@@ -222,16 +224,15 @@ function playCanvas() {
             this.newY += 0.01 * this.acceleration;
 
             // If the shooting star hits the random path in certain range, initialize explosion
-            // TODO: Replace hard-coded values with dynamic range
-            if (context.isPointInPath(this.x, Math.random() * (350 - 50) + 50)) {
-                const newFireworksElement = new FireworksElement(this.x, this.y, radius, this.color);
-                fireworksParticles.push(newFireworksElement);
-                newFireworksElement.explode();
+            if (context.isPointInPath(this.x, Math.random() * CANVAS.height / 3 + 50)) {
+                const newFireworksParticle = new FireworksElement(this.x, this.y, radius, this.color);
+                fireworksParticles.push(newFireworksParticle);
+                newFireworksParticle.explode();
             }
         }
     }
 
-    // Fireworks object which explodes
+    // Fireworks object which explodes (shooting star that had hit a random path)
     function FireworksElement(x, y, radius, color) {
         this.x = x;
         this.y = y;
@@ -272,13 +273,13 @@ function playCanvas() {
                     this.zeroDistX = this.x;
                     this.zeroDistY = this.y;
 
-                    // For every certain number of explosions make one different
-                    if (countForParticleChange === EXPLOSIONS) {
-                        const boomText = new Boom(this.newX, this.newY, this.radius, this.color, this.zeroDistX, this.zeroDistY, this.maxDist);
-                        burstnumbers.push(boomText);
-                        boomText.x = this.x;
-                        boomText.y = this.y;
-                    } else if (countForParticleChange < EXPLOSIONS) {
+                    // For every certain number of explosions make one with different effect
+                    if (countForExplosionEffectChange === EXPLOSIONS) {
+                        const explosionText = new DifferentExplosionParticle(this.newX, this.newY, this.radius, this.color, this.zeroDistX, this.zeroDistY, this.maxDist);
+                        bursteffects.push(explosionText);
+                        explosionText.x = this.x;
+                        explosionText.y = this.y;
+                    } else if (countForExplosionEffectChange < EXPLOSIONS) {
                         const particle = new Particle(this.newX, this.newY, this.radius, this.color, this.zeroDistX, this.zeroDistY, this.maxDist);
                         particle.x = this.x;
                         particle.y = this.y;
@@ -287,11 +288,11 @@ function playCanvas() {
                 }
             }
 
-            if (countForParticleChange === EXPLOSIONS) {
-                countForParticleChange = 0;
+            if (countForExplosionEffectChange === EXPLOSIONS) {
+                countForExplosionEffectChange = 0;
 
-            } else if (countForParticleChange < EXPLOSIONS) {
-                countForParticleChange++;
+            } else if (countForExplosionEffectChange < EXPLOSIONS) {
+                countForExplosionEffectChange++;
 
             }
 
@@ -311,12 +312,14 @@ function playCanvas() {
         this.zeroDistY = zeroDistY;
         this.maxDist = maxDist;
 
-        this.fall = function () {
+        // Make exploded particles 
+        this.scatterAndFall = function () {
 
             // Keep the bursting particles array clean and remove them when they exit the screen or are at a certain distance from the explosion epicenter
             if (this.x < 0 || this.y < 0 || this.x > CANVAS.width || this.y > CANVAS.height || Math.hypot(Math.abs(this.x - zeroDistX), Math.abs(this.y - zeroDistY)) > Math.random() * maxDist) {
                 burstparticles.splice(burstparticles.indexOf(this), 1);
             }
+
             context.beginPath();
             this.x += x;
             this.y += y;
@@ -327,8 +330,8 @@ function playCanvas() {
         }
     }
 
-    // Text from explosion
-    function Boom(x, y, radius, color, zeroDistX, zeroDistY, maxDist) {
+    // Text effect from explosion
+    function DifferentExplosionParticle(x, y, radius, color, zeroDistX, zeroDistY, maxDist) {
         this.x = x;
         this.y = y;
         this.radius = radius * 30;
@@ -340,20 +343,21 @@ function playCanvas() {
         this.maxDist = maxDist;
         this.font = this.radius + "px monospace";
 
-        this.rain = function () {
+        this.scatterAndFade = function () {
+
             // Keep the bursting number array clean
             if (this.x < 0 || this.y < 0 || this.x > CANVAS.width || this.y > CANVAS.height || Math.hypot(Math.abs(this.x - zeroDistX), Math.abs(this.y - zeroDistY)) > Math.random() * maxDist) {
-                burstnumbers.splice(burstnumbers.indexOf(this), 1);
+                bursteffects.splice(bursteffects.indexOf(this), 1);
             }
+
             context.beginPath();
             this.x += x;
             this.y += y;
             context.font = this.font;
             context.strokeStyle = this.color;
-            //context.drawImage(devLogo, this.x, this.y, 72.6, 109)
             context.strokeText("devKarin", this.x, this.y);
 
-            // Taking advantage of the fall duration and of the amount fall function is fired - the more it is fired, the bolder the congratulation text is.
+            // Taking advantage of the scattering duration and of the amount scattering function is fired - the more it is fired, the bolder the text is.
             // As the particles disappear - the text seems to be fading. 
             writeTheApplicationNameAndAuthor(this.color);
             this.y += 0.01 * this.acceleration;
@@ -363,18 +367,22 @@ function playCanvas() {
 
     function writeTheApplicationNameAndAuthor(color) {
         this.color = color;
-        context.font = "80px Lucida Handwriting";
+        context.font = `${CANVAS.width * 0.0625}px Lucida Handwriting`;
         context.strokeStyle = this.color;
         context.textAlign = "center";
         context.strokeText("Fireworks by", (CANVAS.width / 2), (CANVAS.height / 6 * 4));
 
+        // Manipulate the svg logo style
+        const logoWidth = CANVAS.width * 0.235;
+        const logoHeight = CANVAS.width * 0.235;
         devLogo.style.display = 'block';
         devLogo.style.position = 'absolute';
-        devLogo.style.height = '300px';
-        devLogo.style.width = '300px';
-        devLogo.style.top = `${CANVAS.height - 310}px`;
-        devLogo.style.left = `${(CANVAS.width / 2) - 150}px`;
+        devLogo.style.height = `${logoHeight}px`;
+        devLogo.style.width = `${logoWidth}px`;
+        devLogo.style.top = `${(CANVAS.height / 6 * 4) + 5}px`;
+        devLogo.style.left = `${CANVAS.width / 2 - logoWidth / 2}px`;
 
+        // Change the color of the text on the logos sunglasses
         let glassesArray = devLogo.contentDocument.getElementsByClassName('st3');
 
         for (const element of glassesArray) {
@@ -383,8 +391,6 @@ function playCanvas() {
         }
     }
 
-
-
     function animate() {
         animationFrameId = requestAnimationFrame(animate);
         devLogo.style.display = 'none';
@@ -392,9 +398,9 @@ function playCanvas() {
         context.clearRect(0, 0, innerWidth, innerHeight);
 
         shootingstars.forEach(star => star.shoot());
-        burstparticles.forEach(burstparticle => burstparticle.fall());
-        burstnumbers.forEach(burstnumber => burstnumber.rain());
         allStars.forEach(individualStar => individualStar.update());
+        burstparticles.forEach(burstparticle => burstparticle.scatterAndFall());
+        bursteffects.forEach(bursteffect => bursteffect.scatterAndFade());
     }
 
     // Make the resizing and animation happen
