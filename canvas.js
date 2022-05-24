@@ -373,8 +373,8 @@ function playCanvas() {
         context.strokeText("Fireworks by", (CANVAS.width / 2), (CANVAS.height / 6 * 4));
 
         // Manipulate the svg logo style
-        const logoWidth = CANVAS.width * 0.235;
-        const logoHeight = CANVAS.width * 0.235;
+        const logoWidth = CANVAS.height * 0.3;
+        const logoHeight = CANVAS.height * 0.3;
         devLogo.style.display = 'block';
         devLogo.style.position = 'absolute';
         devLogo.style.height = `${logoHeight}px`;
